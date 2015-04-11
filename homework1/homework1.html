@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="en">
+
+	<head>
+
+		<meta charset="utf-8">
+
+		<title>Data Visualization - Homework 1</title>
+
+		<style>
+			* {
+		    	font-family: sans-serif;
+		    }
+			.bar {
+			  	fill: purple;
+				-moz-transition: all 0.2s;
+				-o-transition: all 0.2s;
+				-webkit-transition: all 0.2s;
+				transition: all 0.2s;
+			}
+
+			.bar:hover {
+				fill: magenta;
+				style.opacity=1;
+			}
+			// .d3-tip {
+			//   line-height: 1;
+			//   font-weight: bold;
+			//   padding: 12px;
+			//   background: rgba(0, 0, 0, 0.8);
+			//   color: #fff;
+			//   border-radius: 2px;
+			// }
+
+			// /* Creates a small triangle extender for the tooltip */
+			// .d3-tip:after {
+			//   box-sizing: border-box;
+			//   display: inline;
+			//   font-size: 10px;
+			//   width: 100%;
+			//   line-height: 1;
+			//   color: rgba(0, 0, 0, 0.8);
+			//   content: "\25BC";
+			//   position: absolute;
+			//   text-align: center;
+			// }
+
+			// /* Style northward tooltips differently */
+			// .d3-tip.n:after {
+			//   margin: -1px 0 0 0;
+			//   top: 100%;
+			//   left: 0;
+			// }
+			.x.axis text {
+				font: 20px sans-serif;
+				font-weight: bold;
+			}
+
+			.y.axis text {
+				font: 16px;
+			}
+
+			.axis path,
+			.axis line {
+				fill: none;
+				stroke: black;
+				shape-rendering: crispEdges;
+			}
+
+			.x.axis path {
+				display: none;
+
+			.label#ckbx_sort {
+				//position: absolute;
+				top: 10px;
+				right: 10px;
+			}
+
+			
+			
+		</style>
+
+		<script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+
+	</head>
+
+
+
+	<body>
+		<div>
+			Github Page For Homework 1
+			<br>
+			<a href="#WriteUp">Write-Up</a>
+		</div>
+		<br>
+		<div>
+		<form name="myform" method="GET">
+	             <input type='text' name=' ' style="width:400px;font-size:14pt;"/>
+ 				<input type='submit' />
+	        </form>
+        </div>
+        <br>
+        <div>
+			<label><input type="checkbox" id="ckbx_sort"> Sort by letter frequency</label>
+		</div>
+		<script type="text/javascript">
+
+			var chart = d3.select("body").append("svg").attr("class", "chart");
+
+			var data = get_frequency(lowercase_letters(decodeURI(window.location.search)));
+
+			var d3_data = d3.entries(data);
+
+
+			var margin = {top: 60, right: 30, bottom: 70, left: 60},
+			    width = 1000 - margin.left - margin.right,
+			    height = 600 - margin.top - margin.bottom;
+
+			var x = d3.scale.ordinal()
+			    .rangeRoundBands([0, width], 0.1);
+
+			var y = d3.scale.linear()
+			    .range([height, 0]);
+
+			var xAxis = d3.svg.axis()
+			    .scale(x)
+			    .orient("bottom")
+			    .innerTickSize(0);
+
+			var yAxis = d3.svg.axis()
+			    .scale(y)
+			    .orient("left")
+			    .tickFormat(d3.format('d'))
+			    .ticks(((d3.max(d3_data, function(d) { return d.value; }) < 7) ? 
+			    		d3.max(d3_data, function(d) { return d.value; }) : 10));
+
+
+			chart = d3.select(".chart")
+				.attr("width", width + margin.left + margin.right)
+			    .attr("height", height + margin.top + margin.bottom)
+			  	.append("g")
+			    .attr("transform", "translate(" + margin.left + "," + margin.top + ")")
+			    							.on('mouseover',function() {
+		        d3.select("y axis")
+		          .transition()
+		          .duration(400)
+		          .remove()
+		      })
+		      .on('mouseout',function () {
+		        d3.select("y label")
+		          .transition()
+		          .duration(400)
+		          .remove()
+
+		      })
+		      ;
+
+			x.domain(d3_data.map(function(d) { return d.key; }));
+			y.domain([0, d3.max(d3_data, function(d) { return d.value; })]);
+
+			chart.append("g")
+				.attr("class", "x axis")
+				.attr("transform", "translate(0," + (height + (margin.bottom / 10)) + ")")
+				.call(xAxis);
+
+			chart.append("text")
+			    .attr("class", "x label")
+			    .attr("text-anchor", "middle")
+			    .attr("x", (width / 2))
+			    .attr("y", height + margin.top + 5)
+			    .text("Letters")
+			    .style("font-size", "140%")
+			    .style("font-weight", "bold");
+
+			chart.append("g")
+				.attr("class", "y axis")
+				.call(yAxis);
+
+    		chart.append("text")
+			    .attr("class", "y label")
+				.attr("transform", "rotate(-90)")
+				.attr("y", 0 - margin.left)
+				.attr("x", 0 - (height / 2))
+				.attr("dy", ".75em")
+				.style("text-anchor", "middle")
+				.text("Frequency")
+				.style("font-size", "140%")
+				.style("font-weight", "bold");
+
+
+			chart.selectAll(".bar")
+			    .data(d3_data)
+			    .enter().append("rect")
+			    .attr("class", "bar")
+			    .attr("x", function(d) { return x(d.key); })
+			    .attr("y", height)
+			    .attr("height", 0)
+			    .attr("width", x.rangeBand())
+			    .style("opacity",  function(d){return getBaseLog(2.05, d.value / d3.max(d3_data, function(d) { return d.value; }) + 1.05);})
+			    .transition()
+				    .delay(function(d, i) { return i * 100; })
+				    .duration(200)
+				    .attr('y', function(d) { return y(d.value); })
+				    .attr('height', function(d) { return height - y(d.value); });
+				    //.style("fill", "purple")
+			    ;
+
+
+			chart.append("text")
+				.attr("class", "title")
+				.attr("x", (width / 2))             
+				.attr("y", 0 - (margin.top / 2))
+				.attr("text-anchor", "middle")  
+				.attr("font-family", "sans-serif")
+				.style("font-size", "200%")
+				.style("font-weight", "bold")
+				.text("Homework 1: Frequency of Letters");
+
+
+			d3.select("input#ckbx_sort").on("change", change);
+
+
+			// var sortTimeout = setTimeout(function() {
+			// 		d3.select("input").property("checked", true).each(change);
+			// 		}
+			// 	, 2000);
+
+			function change() {
+				//clearTimeout(sortTimeout);
+
+				// Copy-on-write since tweens are evaluated after a delay.
+				var x0 = x.domain(d3_data.sort(this.checked
+				    ? function(a, b) { return b.value - a.value; }
+				    : function(a, b) { return d3.ascending(a.key, b.key); })
+				    .map(function(d) { return d.key; }))
+				    .copy();
+
+				chart.selectAll(".bar")
+				    .sort(function(a, b) { return x0(a.key) - x0(b.key); });
+
+				var transition = chart.transition().duration(750),
+				    delay = function(d, i) { return i * 50; };
+
+				transition.selectAll(".bar")
+				    .delay(delay)
+				    .attr("x", function(d) { return x0(d.key); });
+
+				transition.select(".x.axis")
+				    .call(xAxis)
+				  .selectAll("g")
+				    .delay(delay);
+			}
+
+
+       //      function handleClick(event){
+       //          console.log(document.getElementById("myVal").value)
+       //          //draw(document.getElementById("myVal").value)
+       //              console.log("Tick:", data);
+
+			    // // Draw current data
+			    // var curBars = chart.selectAll(".bar").data(get_frequency(lowercase_letters(document.getElementById("myVal").value)),
+			    // 			 function(d) { console.log(d.id); return d.id; });
+			    // var newBars = curPoints.enter();
+			    // var oldBars = curPoints.exit();
+
+			    // get_frequency(lowercase_letters(document.getElementById("myVal").value));
+
+
+
+			    // console.log(
+			    //     "Cur:", curPoints.size(),
+			    //     "New:", newPoints.size(),
+			    //     "Old:", oldPoints.size()
+			    // );
+
+			    // // Gradually transition existing points to grey
+			    // // Do we need to do this to ALL points?
+			    // // curPoints.transition()
+			    // //     .duration(duration)
+			    // //     .style("fill", colors.grey);
+
+			    // //We could filter out the points already grey.
+			    // curBars.transition()
+			    //     .filter(function(d) {
+			    //         return d3.select(this).style("fill") != colors.grey;
+			    //     })
+			    //     .duration(duration)
+			    //     .style("fill", colors.grey);
+
+			    // // Add new points
+			    // newBars.append("rect")
+				   //  .enter().append("rect")
+				   //  .attr("class", "bar")
+				   //  .attr("x", function(d) { return x(d.key); })
+				   //  .attr("y", height)
+				   //  .attr("height", 0)
+				   //  .attr("width", x.rangeBand())
+				   //  .style("opacity",  function(d){return getBaseLog(2.05, d.value / d3.max(d3_data, function(d) { return d.value; }) + 1.05);})
+				   //      // Gradually fade the points in
+				   //      .transition()
+				   //          .delay(function(d, i) {
+				   //              return i * 20;
+				   //          })
+				   //          .duration(duration)
+				   //          .style("fill-opacity", 0.8);
+
+			    // // Remove old points
+			    // // oldPoints.transition()
+			    // //     .duration(duration)
+			    // //     .style("fill-opacity", 0)
+			    // //     .remove();
+
+			    // // Make old points green, and then fade out
+			    // oldBars.transition()
+			    //         d3.select(this).transition()
+			    //             .duration(duration)
+			    //             .remove();
+
+       //          return false;
+       //      }
+
+			function getBaseLog(base, x) {
+				return Math.log(x) / Math.log(base);
+			}
+
+			function type(d) {
+			 	d.value = +d.value; // coerce to number
+			 	return d;
+			}
+
+
+			function lowercase_letters(string){
+				return string.toLowerCase().replace(/[^a-z]/g, '')
+			}
+
+			function get_frequency(str) {
+			    var freq = {};
+			    for (var i=0; i<str.length;i++) {
+			        var letter = str.charAt(i);
+			        if (freq[letter]) {
+			           freq[letter]++;
+			        } else {
+			           freq[letter] = 1;
+			        }
+			    }
+			    return freq;
+			};
+
+			function get_obj_values(obj) {
+				var dataArray = new Array;
+				for(var o in dataObject) {
+    				dataArray.push(dataObject[o]);
+    			}
+			};
+
+		</script>
+
+<br>
+<br><br>
+
+<a name="WriteUp">
+                        <font color="black"><h2>Write-Up</h2></font>
+                    </a>
+		<p class=MsoNormal>I attempted to make an aesthetically pleasing bar chart that
+is not too busy given the list of functionality choices for implementation.  My
+decision to clean up the axes and axis labels are to make the chart more
+readable.  The opacity of the bars indicate the frequency of the letters to
+make it more obvious to see the differences. I chose not to include gridlines
+because it made the plot area visually cluttered.</p>
+
+<p class=MsoNormal>&nbsp;</p>
+
+<p class=MsoNormal><u>C-Level Functionality:</u></p>
+
+<p class=MsoListParagraphCxSpFirst style='text-indent:-.25in'><span
+style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span>Modified tick labels on the x-axis to be bigger and move further
+away from the bottom of the bars in order to improve readability.</p>
+
+<p class=MsoListParagraphCxSpMiddle style='text-indent:-.25in'><span
+style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span>Modified ticks on the x-axis to not show because they didn’t seem
+necessary</p>
+
+<p class=MsoListParagraphCxSpMiddle style='text-indent:-.25in'><span
+style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span>Modified the tick labels on y-axis to be bigger.  Only included
+integer values.</p>
+
+<p class=MsoListParagraphCxSpMiddle style='text-indent:-.25in'><span
+style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span>Modified the tick marks on the y-axis to remove the extra ticks
+from eliminating the non-whole numbers of letter counts because you can’t have
+fractional letters.</p>
+
+<p class=MsoListParagraphCxSpMiddle style='text-indent:-.25in'><span
+style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span>The bar colors vary depending on the letter frequency.  The
+frequent letters are darker than the less frequent letters.  This is to make it
+very apparent to the viewer which bars are more frequent.</p>
+
+<p class=MsoListParagraphCxSpMiddle style='text-indent:-.25in'><span
+style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span>The bar colors are now purple.  This was simply a design choice.</p>
+
+<p class=MsoListParagraphCxSpLast style='text-indent:-.25in'><span
+style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span>The bars can be sorted alphabetically and by frequency.</p>
+
+<p class=MsoNormal>&nbsp;</p>
+
+<p class=MsoNormal><u>B-Level Functionality:</u></p>
+
+<p class=MsoListParagraphCxSpFirst style='text-indent:-.25in'><span
+style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span>Added a button to toggle between sorting alphabetically or by
+letter frequency.</p>
+
+<p class=MsoListParagraphCxSpLast style='text-indent:-.25in'><span
+style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span>Added a textbox input form to get input and calculate letter
+frequency.</p>
+
+<p class=MsoNormal>&nbsp;</p>
+
+<p class=MsoNormal><u>A-Level Functionality:</u></p>
+
+<p class=MsoListParagraph style='text-indent:-.25in'><span style='font-family:
+Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span>Bars grow one at a time from the bottom up when the page is
+initially loaded.</p>
+
+<p class=MsoNormal>&nbsp;</p>
+
+</div>
+
+	</body>
+</html>
