@@ -23,34 +23,34 @@
 				fill: magenta;
 				style.opacity=1;
 			}
-			// .d3-tip {
-			//   line-height: 1;
-			//   font-weight: bold;
-			//   padding: 12px;
-			//   background: rgba(0, 0, 0, 0.8);
-			//   color: #fff;
-			//   border-radius: 2px;
-			// }
+			.d3-tip {
+			  line-height: 1;
+			  font-weight: bold;
+			  padding: 12px;
+			  background: rgba(0, 0, 0, 0.8);
+			  color: #fff;
+			  border-radius: 2px;
+			}
 
-			// /* Creates a small triangle extender for the tooltip */
-			// .d3-tip:after {
-			//   box-sizing: border-box;
-			//   display: inline;
-			//   font-size: 10px;
-			//   width: 100%;
-			//   line-height: 1;
-			//   color: rgba(0, 0, 0, 0.8);
-			//   content: "\25BC";
-			//   position: absolute;
-			//   text-align: center;
-			// }
+			/* Creates a small triangle extender for the tooltip */
+			.d3-tip:after {
+			  box-sizing: border-box;
+			  display: inline;
+			  font-size: 10px;
+			  width: 100%;
+			  line-height: 1;
+			  color: rgba(0, 0, 0, 0.8);
+			  content: "\25BC";
+			  position: absolute;
+			  text-align: center;
+			}
 
-			// /* Style northward tooltips differently */
-			// .d3-tip.n:after {
-			//   margin: -1px 0 0 0;
-			//   top: 100%;
-			//   left: 0;
-			// }
+			/* Style northward tooltips differently */
+			.d3-tip.n:after {
+			  margin: -1px 0 0 0;
+			  top: 100%;
+			  left: 0;
+			}
 			.x.axis text {
 				font: 20px sans-serif;
 				font-weight: bold;
@@ -81,6 +81,7 @@
 		</style>
 
 		<script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+		<script src="http://labratrevenge.com/d3-tip/javascripts/d3.tip.v0.6.3.js"></script>
 
 	</head>
 
@@ -137,25 +138,23 @@
 			    		d3.max(d3_data, function(d) { return d.value; }) : 10));
 
 
+			var tip = d3.tip()
+			  .attr('class', 'd3-tip')
+			  .offset([-10, 0])
+			  .html(function(d) {
+			    return "<strong> <center>" + d.key + "</center><br>Frequency: </strong> <span style='color:red'>" + d.value + "</span>";
+			  })
+
+
 			chart = d3.select(".chart")
 				.attr("width", width + margin.left + margin.right)
 			    .attr("height", height + margin.top + margin.bottom)
 			  	.append("g")
 			    .attr("transform", "translate(" + margin.left + "," + margin.top + ")")
-			    							.on('mouseover',function() {
-		        d3.select("y axis")
-		          .transition()
-		          .duration(400)
-		          .remove()
-		      })
-		      .on('mouseout',function () {
-		        d3.select("y label")
-		          .transition()
-		          .duration(400)
-		          .remove()
-
-		      })
 		      ;
+
+
+		      chart.call(tip);
 
 			x.domain(d3_data.map(function(d) { return d.key; }));
 			y.domain([0, d3.max(d3_data, function(d) { return d.value; })]);
@@ -199,6 +198,8 @@
 			    .attr("height", 0)
 			    .attr("width", x.rangeBand())
 			    .style("opacity",  function(d){return getBaseLog(2.05, d.value / d3.max(d3_data, function(d) { return d.value; }) + 1.05);})
+			          .on('mouseover', tip.show)
+      .on('mouseout', tip.hide)
 			    .transition()
 				    .delay(function(d, i) { return i * 100; })
 				    .duration(200)
@@ -422,6 +423,10 @@ letter frequency.</p>
 style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span>Added a textbox input form to get input and calculate letter
 frequency.</p>
+
+<p class=MsoListParagraphCxSpLast style='text-indent:-.25in'><span
+style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span>Included tooltips for each bar when hovering mouse over a bar to indicate letter frequency.</p>
 
 <p class=MsoNormal>&nbsp;</p>
 
