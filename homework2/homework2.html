@@ -210,7 +210,7 @@ function generateParallelCoord(){
       }
       else {
           y[d] = d3.scale.linear()
-            .domain(d3.extent(dataset, function(p) { return +p[d]; }))
+            .domain(d3.extent(dataset, function(p) { return +p[d]; })).nice()
             .range([height, 0]);
       }
 
@@ -239,6 +239,7 @@ function generateParallelCoord(){
         .attr("d", path)
           .style("stroke",function(d) {return c(d.state_region);})
           .style("opacity", .5)
+          .attr("d", path)
         ;
 
     // Add a group element for each dimension.
@@ -340,30 +341,27 @@ function generateParallelCoord(){
     return line(dimensions.map(function(p) { return [position(p), y[p](d[p])]; }));
   }
 
-  function brushstart() {
-    d3.event.sourceEvent.stopPropagation();
-  }
-
-  // Handles a brush event, toggling the display of foreground lines.
-  function brush() {
-    var actives = dimensions.filter(function(p) { return !y[p].brush.empty(); }),
-        extents = actives.map(function(p) { return y[p].brush.extent(); });
-    foreground.style("display", function(d) {
-      return actives.every(function(p, i) {
-
-        if(d === "state_region") {
-             return extents[i][0] <= y[p](d[p]) && y[p](d[p]) <= extents[i][1];
-        }
-        else {
-          return extents[i][0] <= d[p] && d[p] <= extents[i][1];
-        }
-      }) ? null : "none";
-    });
-  }
+      function brushstart() {
+      d3.event.sourceEvent.stopPropagation();
+    }
 
 
-
-
+    function brush() {
+      var actives = dimensions.filter(function(p) { return !y[p].brush.empty(); }),
+          extents = actives.map(function(p) { return y[p].brush.extent(); });
+      foreground.style("display", function(d) {
+          return actives.every(function(p, i)
+          {
+              // Categorical
+              if (["state_name", "state_region", "state_division"].indexOf(p) > -1) {
+                  return extents[i][0] <= y[p](d[p]) && y[p](d[p]) <= extents[i][1];
+              } else {
+                  // Numeric
+                  return extents[i][0] <= d[p] && d[p] <= extents[i][1];
+              }
+          }) ? null : "none";
+      });
+    }
 }
 
 
@@ -1054,7 +1052,7 @@ style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&n
 
 <p class=MsoListParagraphCxSpFirst style='text-indent:-.25in'><span
 style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span>-There is a brush effect on the continuous variable axes.</p>
+</span></span>-There is a brush effect on the variable axes.</p>
 
 <p class=MsoListParagraphCxSpLast style='text-indent:-.25in'><span
 style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
