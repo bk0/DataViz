@@ -2,17 +2,498 @@
 <html lang="en">
   <head>
     <meta charset="utf-8">
+    <title>Data Visualization - Homework 3</title>
+
+    <style>
+      div {
+      margin-right: 150px;
+      margin-left: 150px;
+      }
+
+      body { font: 14px Arial;}
+
+    .axis0 line,
+    .axis0 path,
+    .axis1 line,
+    .axis1 path {
+      fill: none;
+      stroke: #000;
+      shape-rendering: crispEdges;
+    }
+
+
+    rect.pane {
+      cursor: move;
+      fill: none;
+      pointer-events: all;
+    }
+
+
+    .area {
+      fill: lightsteelblue;
+      clip-path: url(#clip);
+    }
+
+
+    path {
+        stroke: steelblue;
+        stroke-width: 2;
+        fill: none;
+    }
+    .axis2 path,
+    .axis2 line {
+      fill: none;
+      stroke: #000;
+      shape-rendering: crispEdges;
+    }
+
+
+    .brush .extent {
+      stroke: #fff;
+      fill-opacity: .125;
+      shape-rendering: crispEdges;
+    }
+
+    .overlay {
+      fill: none;
+      pointer-events: all;
+    }
+
+    </style>
+
+    <script src="http://d3js.org/d3.v3.min.js"></script>
+
 
   </head>
 
-<img src="http://www.excelcharts.com/blog/wp-content/uploads/2014/10/cnedu.png">
-<img src="http://cdn.staticportent.com/images/2011/01/lousylinegraph.png">
-<img src="http://cdn2.hubspot.net/hub/53/file-596009916-png/Blog-Related_Images/piecharts_vs_bar_charts.png">
-<img src="http://dev.perl.hu/blog/hurrrdurrr.png">
-<img src="http://www.sanitaryum.com/wp-content/uploads/2011/09/Losing-Control.jpg">
+
 
 <body>
 
 
+    <div><h2>Brian Kui</h2></div>
+    <div><h2>Homework 3 - Interactive Time Series Visualization</h2></div>
+    <br>
+    <div><h2>
+      <a href="https://github.com/bk0/DataViz/blob/gh-pages/homework3/homework3.html">Github Page For Homework 3</a>
+          </h2></div>
+      <br>
+      <div>
+<h2><strong>Write-up:</strong></h2>
+
+<ul>
+  <li><strong>Data Preprocessing</strong>
+
+  <ul>
+    <li>I did not perform any data preprocessing on the original dataset. &nbsp;I created the dates in javascript when I imported the csv file.</li>
+  </ul>
+  </li>
+  <li><strong>Functionality</strong>
+  <ul>
+    <li><em>Basic</em>
+    <ul>
+      <li>Multi-Series Line Plot</li>
+      <li>Area Plot</li>
+    </ul>
+    </li>
+    <li><em>Moderate</em>
+    <ul>
+      <li>Zooming - on Line Plot</li>
+      <li>Panning - on Line Plot</li>
+      <li>Details-on-Demand (Tooltip) - on Area Plot</li>
+    </ul>
+    </li>
+    <li><em>Advanced</em>
+    <ul>
+      <li>Brushing - on Area Plot</li>
+    </ul>
+    </li>
+  </ul>
+  </li>
+  <li><strong>How to interact with visualizations</strong>
+  <ul>
+    <li>Line Plot
+    <ul>
+      <li>Panning is activated by dragging left and right</li>
+      <li>Zooming is activated by scrolling (via mouse scoll or touchpad)</li>
+    </ul>
+    </li>
+    <li>Area Plot
+    <ul>
+      <li>Drag in the context area below the main plot to select a time frame</li>
+      <li>Click outside the selected context area to unselect</li>
+    </ul>
+    </li>
+  </ul>
+  </li>
+  <li><strong>Design Motivations</strong>
+  <ul>
+    <li>For the line plot, I used dual y-axes to plot the two lines in order to better show the relationship between Number of Drivers Killed or injured versus the Petrol Price. &nbsp;These two variables have very different y-axis scales which is why I used dual y axes. &nbsp;The color of the lines correspond to the color of the y-axis labels and axis title. &nbsp;I used panning and zooming so the user could examine the time trend in detail for a few months or in general with a longer time frame.</li>
+    <li>For the area plot, I plotted the area in a lighter color than the max y-value at any date to better show the y-value. &nbsp;It also looks like a guide for the dot used in the tool-tip which shows the exact value and date at any point. &nbsp;The brushing allows the user to examine the data over a long time frame or a short one.</li>
+  </ul>
+  </li>
+</ul>
+</div>
+
+
+<script type="text/javascript">
+
+
+var dataset;
+var seatbelt_date;
+
+d3.csv("Seatbelts.csv", function(data){
+
+  data.forEach(function(d) {
+    d.date = new Date(+d.Year, +d.Month, 1);
+  });
+
+  dataset = data;
+
+  seatbelt_date = new Date(1983, 2, 0);
+
+  //console.log(dataset);
+
+  d3.select("body").append("hr");
+  d3.select("body").append("br");
+  d3.select("body").append("br");
+  d3.select("body").append("text")
+        .text("        Line Plot")
+        .style("font-size", "250%")
+        .style("font-weight", "bold");
+
+  d3.select("body").append("div").attr("class", "lineplot").attr("align", "center");
+generateLinePlot();
+
+  d3.select("body").append("br");
+  d3.select("body").append("br");
+
+  d3.select("body").append("hr");
+  d3.select("body").append("br");
+  d3.select("body").append("br");
+      d3.select("body").append("text")
+        .text("        Area Plot")
+        .style("font-size", "250%")
+        .style("font-weight", "bold");
+    d3.select("body").append("br");
+  d3.select("body").append("br");
+    d3.select("body").append("br");
+  d3.select("body").append("div").attr("class", "areaplot").attr("align", "center");
+ generateAreaPlot();
+});
+
+
+
+function generateLinePlot(){
+
+  var margin = {top: 50, right: 60, bottom: 50, left: 60},
+      width = 900 - margin.left - margin.right,
+      height = 500 - margin.top - margin.bottom;
+
+  var parseDate = d3.time.format("%b-%y").parse;
+
+  var x = d3.time.scale().range([0, width]);
+  var y0 = d3.scale.linear().range([height, 0]);
+  var y1 = d3.scale.linear().range([height, 0]);
+
+  var xAxis = d3.svg.axis().scale(x)
+      .orient("bottom").ticks(10);
+
+  var yAxisLeft = d3.svg.axis().scale(y0)
+      .orient("left").ticks(6);
+
+  var yAxisRight = d3.svg.axis().scale(y1)
+      .orient("right").ticks(6); 
+
+  var valueline0 = d3.svg.line()
+      .x(function(d) { return x(d.date); })
+      .y(function(d) { return y0(+d.drivers); });
+      
+  var valueline1 = d3.svg.line()
+      .x(function(d) { return x(d.date); })
+      .y(function(d) { return y1(+d.PetrolPrice); });
+
+  var svg = d3.select(".lineplot")
+      .append("svg")
+          .attr("width", width + margin.left + margin.right)
+          .attr("height", height + margin.top + margin.bottom)
+      .append("g")
+          .attr("transform", 
+                "translate(" + margin.left + "," + margin.top + ")")
+          ;
+
+  var zoom = d3.behavior.zoom()
+    .on("zoom", draw);
+
+
+  svg.append("path")
+      .style("stroke", "green")
+      .style("fill", "none")
+      .style("stroke-width", 3)
+      .attr("class", "line1")
+      .attr("clip-path", "url(#clip1)");
+
+  svg.append("path")
+      .style("stroke", "steelblue")
+      .style("fill", "none")
+      .style("stroke-width", 3)
+      .attr("class", "line0")
+      .attr("clip-path", "url(#clip1)");
+
+  svg.append("clipPath")
+      .attr("id", "clip1")
+    .append("rect")
+      .attr("x", x(0))
+      .attr("y", y0(1))
+      .attr("width", x(1) - x(0))
+      .attr("height", y0(0) - y0(1));
+
+
+  svg.append("rect")
+      .attr("class", "pane")
+      .attr("width", width)
+      .attr("height", height)
+      .call(zoom);
+
+
+  svg.append("g")          
+      .attr("class", "x axis0")
+      .attr("transform", "translate(0," + height + ")")
+      ;
+
+  svg.append("g")
+      .attr("class", "y axis0")
+      .style("fill", "steelblue")
+      ; 
+
+  svg.append("text")
+    .attr("class", "y label1")
+    .attr("transform", "rotate(-90)")
+    .attr("y", 0 - margin.left)
+    .attr("x", 0 - (height / 2))
+    .attr("dy", ".75em")
+    .style("fill", "steelblue")
+    .style("text-anchor", "middle")
+    .text("Number of Drivers Killed or Injured")
+    .style("font-size", "120%")
+    .style("font-weight", "bold");
+
+  svg.append("g")       
+      .attr("class", "y axis1")  
+      .attr("transform", "translate(" + width + " ,0)") 
+      .style("fill", "green");
+
+  svg.append("text")
+    .attr("class", "y label1")
+    .attr("transform", "rotate(90)")
+    .attr("y", - width - margin.left + 5)
+    .attr("x", height /2 )
+    .attr("dy", ".75em")
+    .style("fill", "green")
+    .style("text-anchor", "middle")
+    .text("Petrol Price (p)")
+    .style("font-size", "120%")
+    .style("font-weight", "bold");
+
+          // Scale the range of the data
+    x.domain([new Date(1982, 0, 1), new Date(1984, 12, 0)]);
+    y0.domain([0, d3.max(dataset, function(d) { return +d.drivers; })]);
+    y1.domain([0, d3.max(dataset, function(d) { return +d.PetrolPrice; })]);
+    zoom.x(x);
+
+    svg.select("path.line0").data([dataset]);
+    svg.select("path.line1").data([dataset]);
+    draw();
+
+
+    function draw() {
+      svg.select("g.x.axis0").call(xAxis);
+      svg.select("g.y.axis0").call(yAxisLeft);
+      svg.select("g.y.axis1").call(yAxisRight);
+      svg.select("path.line0").attr("d", valueline0(dataset));
+      svg.select("path.line1").attr("d", valueline1(dataset));
+    }
+
+}
+
+
+
+
+
+
+function generateAreaPlot(){
+
+  var margin = {top: 10, right: 60, bottom: 100, left: 60},
+      margin2 = {top: 430, right: 60, bottom: 20, left: 60},
+      width = 960 - margin.left - margin.right,
+      height = 500 - margin.top - margin.bottom,
+      height2 = 500 - margin2.top - margin2.bottom;
+
+  var formatDate = d3.time.format("%b-%y"),
+     parseDate = formatDate.parse,
+    bisectDate = d3.bisector(function(d) { return d.date; }).left,
+    formatOutput0 = function(d) { return formatDate(d.date) + ": " + d.front; };
+
+
+
+  var x = d3.time.scale().range([0, width]),
+      x2 = d3.time.scale().range([0, width]),
+      y = d3.scale.linear().range([height, 0]),
+      y2 = d3.scale.linear().range([height2, 0]);
+
+  var xAxis = d3.svg.axis().scale(x).orient("bottom"),
+      xAxis2 = d3.svg.axis().scale(x2).orient("bottom"),
+      yAxis = d3.svg.axis().scale(y).orient("left");
+
+  var brush = d3.svg.brush()
+      .x(x2)
+      .on("brush", brushed);
+
+  var area = d3.svg.area()
+      .interpolate("monotone")
+      .x(function(d) { return x(d.date); })
+      .y0(height)
+      .y1(function(d) { return y(+d.front); });
+
+  var area2 = d3.svg.area()
+      .interpolate("monotone")
+      .x(function(d) { return x2(d.date); })
+      .y0(height2)
+      .y1(function(d) { return y2(+d.front); });
+
+  var svg = d3.select(".areaplot").append("svg")
+      .attr("width", width + margin.left + margin.right)
+      .attr("height", height + margin.top + margin.bottom);
+
+
+  svg.append("defs").append("clipPath")
+      .attr("id", "clip")
+    .append("rect")
+      .attr("width", width)
+      .attr("height", height);
+
+  var focus = svg.append("g")
+      .attr("class", "focus")
+      .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+
+
+  var context = svg.append("g")
+      .attr("class", "context")
+      .attr("transform", "translate(" + margin2.left + "," + margin2.top + ")");
+
+
+    dataset.sort(function(a, b) {
+      return a.date - b.date;
+    });
+
+    x.domain(d3.extent(dataset.map(function(d) { return d.date; })));
+    y.domain([0, d3.max(dataset.map(function(d) { return +d.front; }))]);
+    x2.domain(x.domain());
+    y2.domain(y.domain());
+
+    focus.append("path")
+        .datum(dataset)
+        .attr("class", "area")
+        .attr("d", area);
+
+
+    focus.append("circle")
+      .attr("class", "y")
+      .attr("r", 4);
+
+  focus.append("text")
+      .attr("class", "y")
+      .attr("dy", "-1em");
+
+    focus.append("g")
+        .attr("class", "x axis2")
+        .attr("transform", "translate(0," + height + ")")
+        .call(xAxis);
+
+    focus.append("g")
+        .attr("class", "y axis2")
+        .call(yAxis);
+
+    focus.append("text")
+        .attr("class", "y label2")
+        .attr("transform", "rotate(-90)")
+        .attr("y", 0 - margin.left)
+        .attr("x", 0 - (height / 2))
+        .attr("dy", ".75em")
+        .style("text-anchor", "middle")
+        .text("Number of Front Passengers Killed or Injured")
+        .style("font-size", "120%")
+        .style("font-weight", "bold");
+
+
+
+    context.append("path")
+        .datum(dataset)
+        .attr("class", "area")
+        .attr("d", area2);
+
+    context.append("g")
+        .attr("class", "x axis2")
+        .attr("transform", "translate(0," + height2 + ")")
+        .call(xAxis2);
+
+    context.append("g")
+        .attr("class", "x brush")
+        .call(brush)
+      .selectAll("rect")
+        .attr("y", -6)
+        .attr("height", height2 + 7);
+
+
+
+      svg.append("rect")
+      .attr("class", "overlay")
+      .attr("width", width)
+      .attr("height", height)
+      .on("mousemove", mousemove);
+
+
+  function mousemove() {
+    var x0 = x.invert(d3.mouse(this)[0]),
+        i = bisectDate(dataset, x0, 1),
+        d0 = dataset[i - 1],
+        d1 = dataset[i],
+        d = x0 - d0.date > d1.date - x0 ? d1 : d0;
+
+    focus.select("circle.y").attr("transform", "translate(" + x(d.date) + "," + y(+d.front) + ")");
+    focus.select("text.y").attr("transform", "translate(" + x(d.date) + "," + y(+d.front) + ")").text(formatOutput0(d));
+  }
+
+
+
+
+  function brushed() {
+    x.domain(brush.empty() ? x2.domain() : brush.extent());
+    focus.select(".area").attr("d", area);
+    focus.select(".x.axis2").call(xAxis);
+  }
+
+
+
+
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</script>
 </body>
 </html>
