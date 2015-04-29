@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <title>Project Dataset</title>
+
+    <!-- Bootstrap Core CSS -->
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        * {
+            font-family: sans-serif;
+        }
+        p {
+            margin-top: 100px;
+            margin-bottom: 100px;
+            margin-right: 150px;
+            margin-left: 75px;
+        }
+    </style>
+
+</head>
+
+<body>
+
+<h2><span style="font-family:verdana,geneva,sans-serif;">Planned Tools</span></h2>
+
+<p><span style="font-family:verdana,geneva,sans-serif;">In preprocessing the data, I will&nbsp;use Excel because I can do it quicker in Excel than in Python or R. &nbsp;When prototyping, I plan on using Excel and/or Tableau to help me &nbsp;play with different visualization layouts. &nbsp;The javascript library&nbsp;I plan on using is primarily D3, but may other visualization libraries such as <a href="http://square.github.io/crossfilter/">Crossfilter</a>,&nbsp;<a href="http://tenxer.github.io/xcharts/">xCharts.js</a>, <a href="http://dimplejs.org/">dimple.js</a>, and/or <a href="http://www.polychartjs.com/">polychart.js</a>.</span></p>
+
+<p>&nbsp;</p>
+
+<h2><span style="font-family:verdana,geneva,sans-serif;">Planned Techniques</span></h2>
+
+<ol>
+    <li><span style="font-family:verdana,geneva,sans-serif;"><u>Multi line time series chart</u></span>
+
+    <ul>
+        <li><span style="font-family:verdana,geneva,sans-serif;">The horizontal axis will be the Year and the vertical will be the per capita self-harm injury rate&nbsp;as one line and per capital suicide death rate as another line. &nbsp;This plot will be interactive with the ability to filter for sex, race, and age group. &nbsp;By plotting both the self-harm injury rate&nbsp;and suicide death rate, the visualization will show the trend of the two rates over time.&nbsp;</span></li>
+    </ul>
+    </li>
+    <li><span style="font-family:verdana,geneva,sans-serif;"><u>Small multiples bar chart</u></span>
+    <ul>
+        <li><span style="font-family:verdana,geneva,sans-serif;">The x-axis will be the age groupings and the bars will represent per capita self-harm injury rate or per capita suicide death rate depending on the selection made by the user. &nbsp;This plot will have functionality to&nbsp;filter&nbsp;on sex and&nbsp;race. &nbsp;I will see if sorting the bars&nbsp;by the per capita rate is beneficial when prototyping in Tableau. &nbsp;This chart will emphasize any differences in sex or race for the different age groupings for the either of the per capita rates.</span></li>
+    </ul>
+    </li>
+    <li><span style="font-family:verdana,geneva,sans-serif;"><u>Bubble chart</u></span>
+    <ul>
+        <li><span style="font-family:verdana,geneva,sans-serif;">I plan to plot the per capita self-harm injury rate on one axis and the per capita suicide rate on the other axis. &nbsp;The size of the bubbles will represent the population of the segment. &nbsp;The color of the bubbles will represent either sex or race. &nbsp;I may have a filter for this. &nbsp;This will show the relationship between the self-harm injury rate and the suicide rate for different groups.</span></li>
+    </ul>
+    </li>
+</ol>
+
+<p>&nbsp;</p>
+
+<h2><span style="font-family:verdana,geneva,sans-serif;">Planned Interaction</span></h2>
+
+<ul>
+    <li><span style="font-family:verdana,geneva,sans-serif;">I plan to link as many of the interactions as possible between the various plots.</span></li>
+    <li><span style="font-family:verdana,geneva,sans-serif;">tooltips - It will show the exact value for the line chart and bar chart, but show all the data for the bubble chart.</span></li>
+    <li><span style="font-family:verdana,geneva,sans-serif;">filtering - I plan of filtering by sex, race, and age group.</span></li>
+    <li><span style="font-family:verdana,geneva,sans-serif;">brushing - this will be in the context panel of the time series chart to select a time, but may not be practical since I only have yearly data from 2001-2013.</span></li>
+    <li><span style="font-family:verdana,geneva,sans-serif;">panning &amp;&nbsp;zooming - this will be in the time series chart, but may not be practical since I only have yearly data from 2001-2013.</span></li>
+    <li><span style="font-family:verdana,geneva,sans-serif;">sorting - this will be used in the small multiples bar chart to sort by per capita rate vs. sorting by age goup.</span></li>
+</ul>
+
+<p>&nbsp;</p>
+
+<h2><span style="font-family:verdana,geneva,sans-serif;">Planned Interface</span></h2>
+
+<img src="DataViz_Sketch_Small.png">
+
+<p>&nbsp;</p>
+    <!-- Bootstrap Core JavaScript -->
+    <script src="js/bootstrap.min.js"></script>
+
+
+
+</body>
+
+</html>
