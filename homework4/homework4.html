@@ -407,10 +407,19 @@ function dsPieChart(){
           curr = "All";
           updateBarChart(curr, "grey");
           updateLineChart(curr, "grey");
+          arcs.selectAll("path").style("opacity", function(d, i) { return 1.0;});
         }
         else{
           updateBarChart(curr, color(i));
           updateLineChart(curr, color(i));
+          arcs.selectAll("path").style("opacity", function(d, i) { 
+            if (d.data.category === curr) {
+              return 1.0;
+            }
+            else {
+              return 0.6;
+            } 
+          });
         }
 
         console.log(prev, curr);
