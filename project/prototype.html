@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Data Visualization - Project Prototype</title>
+
+    <style>
+      div {
+      margin-right: 150px;
+      margin-left: 150px;
+      }
+
+      body { font: 14px Arial;}
+
+    .axis0 line,
+    .axis0 path,
+    .axis1 line,
+    .axis1 path {
+      fill: none;
+      stroke: #000;
+      shape-rendering: crispEdges;
+    }
+
+
+    rect.pane {
+      cursor: move;
+      fill: none;
+      pointer-events: all;
+    }
+
+
+    .area {
+      fill: lightsteelblue;
+      clip-path: url(#clip);
+    }
+
+
+    path {
+        stroke: steelblue;
+        stroke-width: 2;
+        fill: none;
+    }
+    .axis2 path,
+    .axis2 line {
+      fill: none;
+      stroke: #000;
+      shape-rendering: crispEdges;
+    }
+
+
+    .brush .extent {
+      stroke: #fff;
+      fill-opacity: .125;
+      shape-rendering: crispEdges;
+    }
+
+    .overlay {
+      fill: none;
+      pointer-events: all;
+    }
+
+    </style>
+
+    <script src="http://d3js.org/d3.v3.min.js"></script>
+
+
+  </head>
+
+
+
+<body>
+
+
+    <div><h2>Brian Kui</h2></div>
+    <div><h2>Project - Prototype</h2></div>
+    <br>
+
+      <br>
+      <div>
+
+<h2><span style="font-family:arial,helvetica,sans-serif;">Dataset Summary</span></h2>
+
+<p style="margin-left: 40px;"><span style="font-family:arial,helvetica,sans-serif;">The data set is the mortality data from the Center for Disease Control and Prevention. &nbsp;I am using a subset of the data set which is focused on suicide deaths and self-harm injuries in the US from 2002 to 2013. &nbsp;Those numbers are reported as per capita (100,000). &nbsp;The variables I have chosen to filter include&nbsp;gender, race, and age group. &nbsp;The motivation behind using the data is to see how the variable affect the rates of suicide deaths and self-harm injuries as well as the relationship between the rate of suicide death and self-harm injuries. &nbsp;If the variables mentioned do not yield&nbsp;interesting relationships as I prototype the other panels in my visualization, I may re-subset the data to include the suicide method,&nbsp;state, month, and day of week&nbsp;information regarding the suicide.</span></p>
+
+<p style="margin-left: 40px;"><span style="font-family:arial,helvetica,sans-serif;"><a href="http://bk0.github.io/DataViz/project/project_dataset.html">Project Dataset Page</a></span></p>
+
+<p style="margin-left: 40px;">&nbsp;</p>
+
+<h2><span style="font-family:arial,helvetica,sans-serif;">Sketch Summary</span></h2>
+
+<p style="margin-left: 40px;"><span style="font-family:arial,helvetica,sans-serif;">In my sketch, there are three panels with three linked visualizations. &nbsp;There is a bubble plot highlighting the suicide and self-harm rates by race, a small multiples bar chart showing the same metrics by age group, and a line chart showing the metrics over time. &nbsp;The prototype presented here is the line chart. &nbsp;I still need to implement the brushing with a context section on the bottom. &nbsp;The hope is to have the brushing recalculate the per capita rates for the other plots (I may discard this functionality if the recalculation is too difficult or too slow). &nbsp;The bubble chart should have the the checkboxs to select race and to re-sort the bar chart panel. &nbsp;I have not implemented these filters yet, but they should filter the other panels when performing the interactions.</span></p>
+
+<p style="margin-left: 40px;"><span style="font-family:arial,helvetica,sans-serif;"><a href="http://bk0.github.io/DataViz/project/project_sketch.html">Project Sketch Page</a></span></p>
+
+<p style="margin-left: 40px;">&nbsp;</p>
+
+<h2><span style="font-family:arial,helvetica,sans-serif;">Visualization Prototype</span></h2>
+</div>
+
+
+<script type="text/javascript">
+
+  var dataset = [
+    {year: 2001, month: 12, harm: 113.48, suicide: 10.75},
+    {year: 2002, month: 12, harm: 112.97, suicide: 11.01},
+    {year: 2003, month: 12, harm: 141.72, suicide: 10.85},
+    {year: 2004, month: 12, harm: 145.37, suicide: 11.08},
+    {year: 2005, month: 12, harm: 126.13, suicide: 11.04},
+    {year: 2006, month: 12, harm: 132.47, suicide: 11.16},
+    {year: 2007, month: 12, harm: 131.23, suicide: 11.49},
+    {year: 2008, month: 12, harm: 123.75, suicide: 11.85},
+    {year: 2009, month: 12, harm: 122.07, suicide: 12.03},
+    {year: 2010, month: 12, harm: 150.61, suicide: 12.43},
+    {year: 2011, month: 12, harm: 156.55, suicide: 12.68},
+    {year: 2012, month: 12, harm: 154.07, suicide: 12.94},
+    {year: 2013, month: 12, harm: 156.32, suicide: 13.02}
+        ]
+        ;
+
+  dataset.forEach(function(d) {
+    d.date = new Date(+d.year, +d.month, 1);
+  });
+
+
+  //console.log(dataset);
+
+  d3.select("body").append("hr");
+  d3.select("body").append("br");
+  d3.select("body").append("br");
+  d3.select("body").append("text")
+        .text("        Line Plot Portion of Visualization")
+        .style("font-size", "250%")
+        .style("font-weight", "bold");
+
+  d3.select("body").append("div").attr("class", "lineplot").attr("align", "center");
+generateLinePlot();
+
+
+
+
+
+function generateLinePlot(){
+
+  var margin = {top: 50, right: 60, bottom: 50, left: 60},
+      width = 900 - margin.left - margin.right,
+      height = 500 - margin.top - margin.bottom;
+
+  var parseDate = d3.time.format("%m-%y").parse;
+
+  var x = d3.time.scale().range([0, width]);
+  var y0 = d3.scale.linear().range([height, 0]);
+  var y1 = d3.scale.linear().range([height, 0]);
+
+  var xAxis = d3.svg.axis().scale(x)
+      .orient("bottom").ticks(10);
+
+  var yAxisLeft = d3.svg.axis().scale(y0)
+      .orient("left").ticks(6);
+
+  var yAxisRight = d3.svg.axis().scale(y1)
+      .orient("right").ticks(6); 
+
+  var valueline0 = d3.svg.line()
+      .x(function(d) { return x(d.date); })
+      .y(function(d) { return y0(d.suicide); });
+      
+  var valueline1 = d3.svg.line()
+      .x(function(d) { return x(d.date); })
+      .y(function(d) { return y1(d.harm); });
+
+  var svg = d3.select(".lineplot")
+      .append("svg")
+          .attr("width", width + margin.left + margin.right)
+          .attr("height", height + margin.top + margin.bottom)
+      .append("g")
+          .attr("transform", 
+                "translate(" + margin.left + "," + margin.top + ")")
+          ;
+
+  var zoom = d3.behavior.zoom()
+    .on("zoom", draw);
+
+
+  svg.append("path")
+      .style("stroke", "green")
+      .style("fill", "none")
+      .style("stroke-width", 3)
+      .attr("class", "line1")
+      .attr("clip-path", "url(#clip1)");
+
+  svg.append("path")
+      .style("stroke", "steelblue")
+      .style("fill", "none")
+      .style("stroke-width", 3)
+      .attr("class", "line0")
+      .attr("clip-path", "url(#clip1)");
+
+  svg.append("clipPath")
+      .attr("id", "clip1")
+    .append("rect")
+      .attr("x", x(0))
+      .attr("y", y0(1))
+      .attr("width", x(1) - x(0))
+      .attr("height", y0(0) - y0(1));
+
+
+  svg.append("rect")
+      .attr("class", "pane")
+      .attr("width", width)
+      .attr("height", height)
+      .call(zoom);
+
+
+  svg.append("g")          
+      .attr("class", "x axis0")
+      .attr("transform", "translate(0," + height + ")")
+      ;
+
+  svg.append("g")
+      .attr("class", "y axis0")
+      .style("fill", "steelblue")
+      ; 
+
+  svg.append("text")
+    .attr("class", "y label1")
+    .attr("transform", "rotate(-90)")
+    .attr("y", 0 - margin.left)
+    .attr("x", 0 - (height / 2))
+    .attr("dy", ".75em")
+    .style("fill", "steelblue")
+    .style("text-anchor", "middle")
+    .text("Per Capita Suicide Rate")
+    .style("font-size", "120%")
+    .style("font-weight", "bold");
+
+  svg.append("g")       
+      .attr("class", "y axis1")  
+      .attr("transform", "translate(" + width + " ,0)") 
+      .style("fill", "green");
+
+  svg.append("text")
+    .attr("class", "y label1")
+    .attr("transform", "rotate(90)")
+    .attr("y", - width - margin.left + 5)
+    .attr("x", height /2 )
+    .attr("dy", ".75em")
+    .style("fill", "green")
+    .style("text-anchor", "middle")
+    .text("Per Capita Self-Harm Injury Rate")
+    .style("font-size", "120%")
+    .style("font-weight", "bold");
+
+          // Scale the range of the data
+    x.domain([new Date(2001, 12, 0), new Date(2013, 12, 0)]);
+    y0.domain([0, d3.max(dataset, function(d) { return d.suicide; })]);
+    y1.domain([0, d3.max(dataset, function(d) { return d.harm; })]);
+    zoom.x(x);
+
+    svg.select("path.line0").data([dataset]);
+    svg.select("path.line1").data([dataset]);
+    draw();
+
+
+    function draw() {
+      svg.select("g.x.axis0").call(xAxis);
+      svg.select("g.y.axis0").call(yAxisLeft);
+      svg.select("g.y.axis1").call(yAxisRight);
+      svg.select("path.line0").attr("d", valueline0(dataset));
+      svg.select("path.line1").attr("d", valueline1(dataset));
+    }
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</script>
+</body>
+</html>
