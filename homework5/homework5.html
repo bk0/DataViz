@@ -1,9 +1,119 @@
-<!doctype html>
-<html>
+<!DOCTYPE html>
+
 <head>
-	<title></title>
-</head>
+    <meta charset="utf-8">
+    <title>Data Visualization - Homework 5 - Earthquakes Visualization</title>
+
+    <!-- load D3 and TopoJSON //-->
+    <script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+    <script src="http://d3js.org/topojson.v1.min.js"></script>
+
+    <!-- load custom CSS and JavaScript //-->
+    <link rel="stylesheet" href="style.css">
+    <script src="script.js"></script>
+
+ </head>
+
 <body>
-<p><img alt="" src="https://raw.githubusercontent.com/bk0/DataViz/gh-pages/img/make-your-own-desktop-wallpaper-high-definition_world-map-screensaver-1.jpg" style="width: 1200px; height: 678px;" /></p>
+<div>
+    <h2><span style="font-family:arial,helvetica,sans-serif;">Brian Kui</span></h2>
+
+<h2><span style="font-family:arial,helvetica,sans-serif;">Homework 5 - Earthquakes Visualization</span></h2>
+
+<p>&nbsp;</p>
+
+<p><span style="font-family:arial,helvetica,sans-serif;"><a href="https://github.com/bk0/DataViz/blob/gh-pages/homework5/homework5.html">Github Page For Homework 5</a></span></p>
+
+<p>&nbsp;</p>
+
+<h2><span style="font-family:arial,helvetica,sans-serif;"><strong>Write-up:</strong></span></h2>
+
+<ul>
+    <li><span style="font-family:arial,helvetica,sans-serif;"><strong>Functionality</strong></span>
+
+    <ul>
+        <li><span style="font-family:arial,helvetica,sans-serif;"><em>Basic</em></span>
+
+        <ul>
+            <li><span style="font-family:arial,helvetica,sans-serif;">Modified code to use the earthquake csv as enumerated on the assignment page (#1-#5). &nbsp;This includes changing the text below the map to provide earthquake information when mousing over the circles indicating an earthquake.</span></li>
+        </ul>
+        </li>
+        <li><span style="font-family:arial,helvetica,sans-serif;"><em>Moderate</em></span>
+        <ul>
+            <li><span style="font-family:arial,helvetica,sans-serif;">Colored circles based on depth of the earthquake (darker means the earthquake was deeper).</span></li>
+        </ul>
+        </li>
+        <li><span style="font-family:arial,helvetica,sans-serif;"><em>Advanced</em></span>
+        <ul>
+            <li><span style="font-family:arial,helvetica,sans-serif;">Implemented interactivity with panning and zooming ability.</span></li>
+        </ul>
+        </li>
+    </ul>
+    </li>
+    <li><span style="font-family:arial,helvetica,sans-serif;"><strong>How to interact with visualization</strong></span>
+    <ul>
+        <li><span style="font-family:arial,helvetica,sans-serif;">Scroll to zoom in and out of the map.</span></li>
+        <li><span style="font-family:arial,helvetica,sans-serif;">Click and drag to pan the map.</span></li>
+    </ul>
+    </li>
+</ul>
+</div>
+<br><hr><br>
+<div id="block">
+<svg id="map" width="1000" height="750"></svg>
+<p id="log">Loading map... please wait.</p>
+</div>
+
+
+
+
+<script>
+/*
+ * For sample TopoJSON files, go to:
+ * https://gist.github.com/mbostock/4090846
+ */
+var base = "https://gist.githubusercontent.com/mbostock/4090846/raw/";
+ var url = {
+        world: base + "world-50m.json",
+        earthquakes: "http://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/4.5_month.csv"
+//     country: base + "us.json",
+//     states:  base + "us-state-names.tsv",
+//     precip:  "usprecip.json" // relative URL
+ };
+
+// Uses reusable chart model
+// See http://bost.ocks.org/mike/chart/
+var chart = symbolMap();
+
+// Update how we access data (need the precip property)
+chart = chart.value(function(d) { return d.mag; });
+
+// Nested calls to trigger drawing in proper order
+d3.json(url.world, function(mapError, mapJSON) {
+    if (processError(mapError)) return;
+
+    // update map data
+    chart = chart.map(mapJSON);
+
+    // Wait until the map is drawn before loading
+    // and drawing the data values
+    d3.csv(url.earthquakes, function(dataError, dataJSON) {
+        if (processError(dataError)) return;
+
+        chart = chart.values(dataJSON);
+        chart("map");
+    });
+});
+
+// Load state lookup information
+// Possible some lookups will fail until this loads
+// d3.tsv(url.states, parseStateName, function(error, data) {
+//         if (processError(error)) return;
+//         chart = chart.lookup(data);
+//     }
+// );
+
+</script>
+
 </body>
 </html>
