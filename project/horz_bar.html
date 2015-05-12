@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+
+	<head>
+
+		<meta charset="utf-8">
+
+		<title>Visualization Project</title>
+
+
+
+
+    <style type="text/css">
+
+
+      body {
+        font: 12px sans-serif;
+      }
+
+      .bar rect {
+        fill: steelblue;
+      }
+
+      .axis path, .axis line {
+        fill: none;
+        stroke: black;
+        shape-rendering: crispEdges;
+      }
+
+    </style>
+
+
+		<script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+
+	</head>
+
+
+
+
+
+	<body>
+
+
+
+    <div></div>
+
+
+
+<div style="width: 100%;">
+    <div style="width: 10%; float: left;"><label><input type="checkbox"> Sort </label></div>
+
+    <div style="float: left; width: 15%;"> Year 
+      <select id="select_year">
+      </select>
+    </div>
+
+    <div style="float: left; width: 15%;"> Gender 
+      <select id="select_gender">
+      </select>
+    </div>
+
+    <div style="float: left; width: 15%;"> Race 
+      <select id="select_race">
+      </select>
+    </div>
+
+    <div style="float: left; width: 15%;"> Age Group 
+      <select id="select_age">
+      </select>
+    </div>
+
+</div>
+
+
+		<script type="text/javascript">
+
+      var filters = {
+                      year: 'All',
+                      gender: 'F',
+                      race: 'All',
+                      age_group: 'All',
+                      //death_code: 'All'
+                    }
+
+      var dataset1;
+
+
+
+      var margin = {top: 20, right: 10, bottom: 20, left: 300},
+          width = 800 - margin.left - margin.right,
+          height = 600 - margin.top - margin.bottom;
+
+
+      var svg = d3.select("body").append("svg")
+          .attr("width", width + margin.left + margin.right)
+          .attr("height", height + margin.top + margin.bottom)
+        .append("g")
+          .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+
+
+
+
+
+      d3.csv("Data.csv", function(data){
+        dataset1 = data;
+
+a = d3.map(dataset1, function(d){return d.year;}).keys();
+a.move(-1,0);
+
+d3.select("select#select_year").selectAll("option")
+    .data(a)
+    .enter()
+    .append("option")
+    .text(function(d){return d;})
+    .attr("value",function(d){return d;});
+
+
+    a = d3.map(dataset1, function(d){return d.gender;}).keys();
+
+d3.select("select#select_gender").selectAll("option")
+    .data(a)
+    .enter()
+    .append("option")
+    .text(function(d){return d;})
+    .attr("value",function(d){return d;});
+
+
+    a = d3.map(dataset1, function(d){return d.race;}).keys();
+d3.select("select#select_race").selectAll("option")
+    .data(a)
+    .enter()
+    .append("option")
+    .text(function(d){return d;})
+    .attr("value",function(d){return d;});
+
+
+    a = d3.map(dataset1, function(d){return d.age_group;}).keys();
+a.move(-1,0);
+
+d3.select("select#select_age").selectAll("option")
+    .data(a)
+    .enter()
+    .append("option")
+    .text(function(d){return d;})
+    .attr("value",function(d){return d;});
+
+
+
+        var x = d3.scale.linear()
+            .domain([0, d3.max(subset(dataset1), function(d) { return +d.capita; })])
+            .range([0, width]);
+
+        var y = d3.scale.ordinal()
+            .domain(subset(dataset1).map(function(d) { return d.death_cause; }))
+            .rangeRoundBands([0, height], .1);
+
+
+        var xAxis = d3.svg.axis()
+            .scale(x)
+            .orient("bottom");
+
+        var yAxis = d3.svg.axis()
+            .scale(y)
+            .orient("left")
+            .innerTickSize(0);
+
+
+        var bar = svg.selectAll(".bar")
+            .data(subset(dataset1))
+          .enter().append("g")
+            .attr("class", "bar")
+            .attr("transform", function(d, i) { return "translate(0," + y(d.death_cause) + ")"; });
+
+        bar.append("rect")
+            .attr("height", y.rangeBand())
+            .attr("width", function(d) { return x(+d.capita); });
+
+
+        svg.append("g")
+          .attr("class", "y axis")
+          .call(yAxis);
+
+        svg.append("g")
+          .attr("class", "x axis")
+          .attr("transform", "translate(0," + height + ")")
+          .call(xAxis);
+
+
+
+        // d3.select("input").on("change", change);
+
+        // var sortTimeout = setTimeout(function() {
+        //   d3.select("input").property("checked", true).each(change);
+        // }, 2000);
+
+        // function change() {
+        //   clearTimeout(sortTimeout);
+
+        //   // Copy-on-write since tweens are evaluated after a delay.
+        //   var y0 = y.domain(subset(dataset1).sort(this.checked
+        //       ? function(a, b) { return b.capita - a.capita; }
+        //       : function(a, b) { return d3.ascending(a.death_cause, b.death_cause); })
+        //       .map(function(d) { return d.death_cause; }))
+        //       .copy();
+
+        //   svg.selectAll(".bar")
+        //       .sort(function(a, b) { return y0(a.death_cause) - y0(b.death_cause); });
+
+        //   var transition = svg.transition().duration(750),
+        //       delay = function(d, i) { return i * 50; };
+
+        //   transition.selectAll(".bar")
+        //       .delay(delay)
+        //       .attr("y", function(d) { return y0(d.death_cause); });
+
+        //   transition.select(".y.axis")
+        //       .call(yAxis)
+        //     .selectAll("g")
+        //       .delay(delay);
+        // }
+        
+      });
+
+
+    
+
+    function subset(d){
+      return d.filter(function(row) {
+        return ['year','gender','race','age_group','death_code'].reduce(function(pass, column) {
+            return pass && (
+              !filters[column] ||
+                  row[column] === filters[column] ||
+                  // pass if the row's value is in an array of filter values
+                  filters[column].indexOf(row[column]) >= 0
+                );
+          }, true);
+      })
+    }
+
+    Array.prototype.move = function (old_index, new_index) {
+        while (old_index < 0) {
+            old_index += this.length;
+        }
+        while (new_index < 0) {
+            new_index += this.length;
+        }
+        if (new_index >= this.length) {
+            var k = new_index - this.length;
+            while ((k--) + 1) {
+                this.push(undefined);
+            }
+        }
+        this.splice(new_index, 0, this.splice(old_index, 1)[0]);
+        //return this; // for testing purposes
+    }
+
+    </script>
+
+
+  </body>
+</html>
