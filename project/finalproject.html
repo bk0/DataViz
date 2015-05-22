@@ -40,10 +40,7 @@
 
 
 	<body>
-    <div style="float: left; position: relative; left: 20%"> 
-      Gender 
-      <select id="select_gender">
-      </select>
+    <div style="float: left; position: relative; left: 20%"> Gender <select id="select_gender"></select>
     </div>
 
     <div id="container" style="width: 1170px;margin: auto;">
@@ -79,7 +76,7 @@
 
 <ul>
   <li style="margin-left: 40px;">I used one csv for all three visualizations by loading it once, but filtering it for each visualization and each interaction for the user.</li>
-  <li style="margin-left: 40px;">I encoded the bars and line by gender so there are three different colors (Male, Female, and Both), but my dropdown menu doesn&#39;t work. &nbsp;It only fires once.</li>
+  <li style="margin-left: 40px;">I encoded the bars and line by gender so there are three different colors (Male, Female, and Both).</li>
   <li style="margin-left: 40px;">I chose each visualization because they show a pattern or trend. &nbsp;The horizontal bar plot shows the difference between the sexes and races with respect to method of suicide. &nbsp;The line plot shows how the race and gender differ in their historical trend for suicide. &nbsp;The small multiples shows how differenet races have different patterns of suicide depending on age.</li>
   <li style="margin-left: 40px;">All plots were done in pure D3.</li>
   <li style="margin-left: 40px;">This is part of lie factor: &nbsp;Since white males commit suicide so much more than any other group, they have the highest influence on any per capita rate that includes them.</li>
@@ -91,7 +88,7 @@
 
 <p style="margin-left: 40px;">&nbsp;</p>
 
-<p style="margin-left: 40px;">If the user clicks on the years on the bottom of the line plot, the year is selected and will change the other two plots for that year selection. &nbsp;Clicking again on the same year will remove the filter by year and all years will be displayed in the other two plots. &nbsp;If the user clicks on a small multiple representing a specific race, then the data in the other two plots will be changed to reflect that race only. &nbsp;Clicking the &quot;All Races&quot; small multiple will bring the user back to the default. &nbsp;There was supposed to be a dropdown menu for selecting gender, but it doesn&#39;t work properly. &nbsp;All interactions help the user find or explore the data.</p>
+<p style="margin-left: 40px;">If the user clicks on the years on the bottom of the line plot, the selected year is highlighed in red&nbsp;and will change the other two plots for that year selection. &nbsp;Clicking again on the same year will remove the filter by year and all years will be displayed in the other two plots. &nbsp;If the user clicks on a small multiple representing a specific race, then the data in the other two plots will be changed to reflect that race only. &nbsp;The active race selection is indicated by the red label of the race in the corner of each small multiple plot. &nbsp;Clicking the &quot;All Races&quot; small multiple will bring the user back to the default. &nbsp; All interactions help the user find or explore the data.</p>
 
 <p style="margin-left: 40px;">&nbsp;</p>
 
@@ -103,19 +100,18 @@
 
 <h2>Challenges</h2>
 
-<p style="margin-left: 40px;">I spent hours looking online and testing different ways to construct a dropdown menu with no luck. &nbsp;It only fires once on load and does not fire on change after. &nbsp;This was my biggest challenge. &nbsp;I just assumed that the dropdown menu would work since it looked very simple, but I have been humbled. &nbsp;My initial challenge was data preprocessing since it took a long time. &nbsp;I had to run 35 reports from the CDC website and paste them together.&nbsp;&nbsp;I was also&nbsp;hard to plan how my data should be formed before actually coding, so I had to go back manipulate my data as I went to fit my needs when I first started. &nbsp;I started a US map visualization, but it wasn&#39;t linked to the other visualization with interactions and it would make my total visualization roll beyond one screen, so I decided not to finish it. &nbsp;I was planning to shade each state with various statistics as picked in a dropdown menu, but I ran into trouble making a dropdown menu work on the map too.</p>
+<p style="margin-left: 40px;">I spent hours looking online and testing different ways to construct a dropdown menu this was by far the most frustrating this I encountered.&nbsp;I just assumed that the dropdown menu would work since it looked very simple, but I have been humbled. &nbsp;Aside from this, my initial challenge was data preprocessing since it took a long time. &nbsp;I had to run 35 reports from the CDC website and paste them together.&nbsp;&nbsp;I was also&nbsp;hard to plan how my data should be formed before actually coding, so I had to go back manipulate my data as I went to fit my needs when I first started. &nbsp;I started a US map visualization, but it wasn&#39;t linked to the other visualization with interactions&nbsp;(because of the limitation by the CDC on using certain data below a national level)&nbsp;and it would make my total visualization roll beyond one screen, so I decided not to finish it. &nbsp;I was planning to shade each state with various statistics as picked in a dropdown menu, but I ran into trouble making a dropdown menu work on the map too.</p>
 
 <p style="margin-left: 40px;">&nbsp;</p>
 
 <h2>Conclusion</h2>
 
 <ul>
-  <li style="margin-left: 40px;">From the horizontal bar chart, I can see that females prefer more gentle methods of suicide (e.g., self-poisoning, hanging) compared to males who overwhelmingly prefer to use a firearm.</li>
-  <li style="margin-left: 40px;">From the line chart, I see that the general suicide rate is up, but flat or declining for some groups like black males.</li>
+  <li style="margin-left: 40px;">From the horizontal bar chart, I can see that females prefer more gentle methods of suicide (e.g., self-poisoning, hanging) compared to males who overwhelmingly prefer to use a firearm with the exception of Asian males.</li>
+  <li style="margin-left: 40px;">From the line chart, I see that the general suicide trend is up, but flat&nbsp;for some groups like black males.</li>
   <li style="margin-left: 40px;">From small multiples, I see that the per capital suicide rate goes up usually in the 85+ age group for all races except American Indian/Alaska Native. &nbsp;The suicide rate for Asians and Whites increases with ages while American Indian/Alaska Natives and Blacks usually peak in their twenties or thirties.</li>
   <li style="margin-left: 40px;">Across all plots, females have a much lower suicide rate than males.</li>
 </ul>
-
 </div>
 
 
@@ -294,23 +290,25 @@
 
 
 
-        d3.select("select#select_gender").selectAll("option")
+        var menu = d3.select("select#select_gender")
+          .on("change",  function() {update_plots("gender", this.options[this.selectedIndex].__data__);})
+          ;
+
+        menu.selectAll("option")
           .data(d3.map(dataset, function(d){return d.gender;}).keys())
           .enter()
           .append("option")
           .text(function(d){return d;})
-          .attr("value",function(d){return d;})
-          //.on("change", update_plots("gender", d3.selectAll("select").property("value")))
-          ;
+          .attr("value",function(d){return d;});
 
-          d3.selectAll("select").on("change", update_plots("gender", d3.select("select").property("value")));
+          //window.onload = d3.selectAll("select").on("change", update_plots("gender", d3.select("select").property("value")));
 
 
 
 
         function update_plots(element, newval) {
           console.log(element, newval);
-          console.log(d3.select("select").property("value"));
+
           switch (element) {
             case "gender":
               gender_curr = deepcopy(newval);
